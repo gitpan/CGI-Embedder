@@ -1,7 +1,7 @@
 package CGI::Embedder;
 use strict;
 
-our $VERSION = 1.01;
+our $VERSION = 1.20;
 
 # Настроечные константы.
 my $c0=chr(1);        # символ для qw
@@ -143,6 +143,6 @@ Does the same as Expand(), but always expands the file C<$filename> content.
 
 =head1 AUTHOR
 
-Dmitry Koteroff <dk@dklab.ru>, http://www.dklab.ru
+Dmitry Koteroff <koteroff@cpan.org>, http://www.dklab.ru
 
 =cut

@@ -1,5 +1,5 @@
-CGI/Embedder version 1.00
-=========================
+CGI/Embedder version
+====================
 
 The README is used to introduce the module and provide instructions on
 how to install the module, any machine dependencies it may have (for
@@ -23,6 +23,5 @@ To install this module type the following:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2001 Dmitry Koteroff (dk@dklab.ru), http://www.dklab.ru.
+Copyright (C) 2004 Dmitry Koteroff (koteroff@cpan.org), http://www.dklab.ru.
 Please email me if you want to use this module.
-
