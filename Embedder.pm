@@ -1,7 +1,7 @@
 package CGI::Embedder;
 use strict;
 
-our $VERSION = 1.20;
+our $VERSION = 1.21;
 
 # Настроечные константы.
 my $c0=chr(1);        # символ для qw
@@ -15,17 +15,17 @@ my %ExpandCache=();   # кэш
 # вне <? и ?>. Она должна возвращать обработанную строку. Но если в 
 # ней появятся <? и ?>, они уже не будут обработаны!
 sub Compile($;$)
-{	my ($Cont,$filter)=@_;
-	$Cont =~ s{^\t*}{}mgo;
-	$Cont="?>$Cont<?";
-	$Cont=~s{<\?=}{<?print }sgo;
-	if(!$filter) {
-		$Cont=~s{\?>(\n?)(.*?)<\?}{"$1;print(qq$c0"._Slash($2)."$c0);"}sgeo;
-	} else {
-		$Cont=~s{\?>(\n?)(.*?)<\?}{"$1;print(qq$c0"._Slash(&$filter($2))."$c0);"}sgeo;
-	}
-	$Cont=~s{print qq$c0$c0}{}sgo;
-	return $Cont;
+{ my ($Cont,$filter)=@_;
+  $Cont =~ s{^\t*}{}mgo;
+  $Cont="?>$Cont<?";
+  $Cont=~s{<\?=}{<?print }sgo;
+  if(!$filter) {
+    $Cont=~s{\?>(\n?)(.*?)<\?}{"$1;print(qq$c0"._Slash($2)."$c0);"}sgeo;
+  } else {
+    $Cont=~s{\?>(\n?)(.*?)<\?}{"$1;print(qq$c0"._Slash(&$filter($2))."$c0);"}sgeo;
+  }
+  $Cont=~s{print qq$c0$c0}{}sgo;
+  return $Cont;
 }
 
 # void Expand(string $Templ [,string $CacheId] [,string $Filename])
@@ -37,47 +37,47 @@ sub Compile($;$)
 # Параметр $Filename влияет только не сообщения об ошибках, которые 
 # могут возникнуть в шаблоне $Templ.
 sub Expand($;$;$;$)
-{	my ($Templ,$CacheId,$Filename,$pkg)=@_;
-	my $Compiled;
-	if(defined($CacheId) && exists($ExpandCache{$CacheId})) {
-		$Compiled=$ExpandCache{$CacheId}; 
-	} else {
-		$Compiled=Compile($Templ); 
-		if(defined($CacheId)) { $ExpandCache{$CacheId}=$Compiled; }
-	}
-	$pkg||=caller;
-	$Filename||="template";
-	$@=undef; 
-	eval("package $pkg;\n#line 1 \"$Filename\"\n$Compiled;");
-	die $@ if $@;
-	return;
+{ my ($Templ,$CacheId,$Filename,$pkg)=@_;
+  my $Compiled;
+  if(defined($CacheId) && exists($ExpandCache{$CacheId})) {
+    $Compiled=$ExpandCache{$CacheId}; 
+  } else {
+    $Compiled=Compile($Templ); 
+    if(defined($CacheId)) { $ExpandCache{$CacheId}=$Compiled; }
+  }
+  $pkg||=caller;
+  $Filename||="template";
+  $@=undef; 
+  eval("package $pkg; no strict;\n#line 1 \"$Filename\"\n$Compiled;");
+  die $@ if $@;
+  return;
 }
 
 # string ExpandFile($fname)
 # То же, что и Expand(), только считывает файл с диска.
 sub ExpandFile($)
-{	my ($fname)=@_;
-	local *F;
-	if(!open(F,$fname)) {
-		require Carp;
-		Carp::croak("Could not open the file $fname");
-	}
-	binmode(F);
-	local ($/,$\);
-	return Expand(<F>,$fname,$fname,caller);
+{ my ($fname)=@_;
+  local *F;
+  if(!open(F,$fname)) {
+    require Carp;
+    Carp::croak("Could not open the file $fname");
+  }
+  binmode(F);
+  local ($/,$\);
+  return Expand(<F>,$fname,$fname,caller);
 }
 
 # string _Slash(string $st)
 # Проставляет слэши перед специальными символами, а также обрабатывает
 # вхождения символов-разделителей.
 sub _Slash($)
-{	my ($st)=@_;
-	$st=~s/$c0/$c0."$c0".qq$c0/g;
-	$st=~s/(\r?\n\s*#line\s*\d[^\n]*\r?\n)/$c0;$1print qq$c0/gs;
-	$st=~s/\\(?!\$)/\\\\/g;
-	$st=~s/\@/\\\@/g;
-	$st=~s/\%/\\\%/g;
-	return $st;
+{ my ($st)=@_;
+  $st=~s/$c0/$c0."$c0".qq$c0/g;
+  $st=~s/(\r?\n\s*#line\s*\d[^\n]*\r?\n)/$c0;$1print qq$c0/gs;
+  $st=~s/\\(?!\$)/\\\\/g;
+  $st=~s/\@/\\\@/g;
+  $st=~s/\%/\\\%/g;
+  return $st;
 }
 
 return 1;
@@ -143,6 +143,6 @@ Does the same as Expand(), but always expands the file C<$filename> content.
 
 =head1 AUTHOR
 
-Dmitry Koteroff <koteroff@cpan.org>, http://www.dklab.ru
+Dmitry Koterov <koterov at cpan dot org>, http://www.dklab.ru
 
 =cut
